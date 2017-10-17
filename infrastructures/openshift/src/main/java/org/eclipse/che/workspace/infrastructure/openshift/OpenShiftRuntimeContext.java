@@ -22,7 +22,6 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 
@@ -31,28 +30,24 @@ public class OpenShiftRuntimeContext extends RuntimeContext {
 
   private final OpenShiftEnvironment openShiftEnvironment;
   private final OpenShiftRuntimeFactory runtimeFactory;
-  private final OpenShiftProjectFactory namespaceFactory;
+  private final OpenShiftProjectFactory projectFactory;
   private final String websocketOutputEndpoint;
-  private final String projectName;
 
   @Inject
   public OpenShiftRuntimeContext(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
-      @Nullable @Named("che.infra.openshift.project") String projectName,
-      OpenShiftProjectFactory namespaceFactory,
+      OpenShiftProjectFactory projectFactory,
       OpenShiftRuntimeFactory runtimeFactory,
       @Assisted InternalEnvironment environment,
       @Assisted OpenShiftEnvironment openShiftEnvironment,
       @Assisted RuntimeIdentity identity,
       @Assisted RuntimeInfrastructure infrastructure)
       throws ValidationException, InfrastructureException {
-
     super(environment, identity, infrastructure);
-    this.namespaceFactory = namespaceFactory;
+    this.projectFactory = projectFactory;
     this.runtimeFactory = runtimeFactory;
     this.openShiftEnvironment = openShiftEnvironment;
     this.websocketOutputEndpoint = cheWebsocketEndpoint;
-    this.projectName = projectName;
   }
 
   /** Returns OpenShift environment which based on normalized context environment configuration. */
@@ -72,10 +67,6 @@ public class OpenShiftRuntimeContext extends RuntimeContext {
 
   @Override
   public InternalRuntime getRuntime() throws InfrastructureException {
-    final String wsId = getIdentity().getWorkspaceId();
-    if (projectName != null) {
-      return runtimeFactory.create(this, namespaceFactory.create(projectName, wsId));
-    }
-    return runtimeFactory.create(this, namespaceFactory.create(wsId));
+    return runtimeFactory.create(this, projectFactory.create(getIdentity()));
   }
 }

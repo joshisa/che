@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
@@ -36,17 +34,7 @@ public class OpenShiftProject {
   private final OpenShiftRoutes routes;
   private final OpenShiftPersistentVolumeClaims pvcs;
 
-  @AssistedInject
-  public OpenShiftProject(OpenShiftClientFactory clientFactory, @Assisted String workspaceId)
-      throws InfrastructureException {
-    this(clientFactory, workspaceId, workspaceId);
-  }
-
-  @AssistedInject
-  public OpenShiftProject(
-      OpenShiftClientFactory clientFactory,
-      @Assisted("name") String name,
-      @Assisted("workspaceId") String workspaceId)
+  public OpenShiftProject(OpenShiftClientFactory clientFactory, String name, String workspaceId)
       throws InfrastructureException {
     this.pods = new OpenShiftPods(name, workspaceId, clientFactory);
     this.services = new OpenShiftServices(name, workspaceId, clientFactory);
